@@ -7,9 +7,12 @@ import cors from 'cors'
 
 connectDB();
 app.use(cors({
-    origin:process.env.CLIENT_URL,
-    credentials:true
-}))
+  origin: [
+    "http://localhost:5173",  
+    "https://syncchat-frontend.onrender.com" 
+  ],
+  credentials: true,
+}));
 app.use(express.json())
 app.use(cookieParser())
 
