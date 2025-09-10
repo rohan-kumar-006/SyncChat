@@ -80,7 +80,7 @@ function Login() {
 
         <p>
           Don't Have an Account? &nbsp;
-          <Link to='/signup' className='text-blue-400 underline'>Sign Up</Link>
+          <Link to='/register' className='text-blue-400 underline'>Sign Up</Link>
         </p>
       </div>
     </div>
