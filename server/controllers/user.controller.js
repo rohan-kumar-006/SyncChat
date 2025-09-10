@@ -109,14 +109,16 @@ export const logout = asyncHandler(async (req, res, next) => {
     const profile= await User.findById(userId);
     
     res.status(200)
-    .cookie("token","",{
-        expires: new Date(Date.now()),
-        httpOnly:true
-    })
-    .json({
-        success:true,
-        responseData:profile
-    })
+  .cookie("token", "", {
+    httpOnly: true,
+    expires: new Date(0),  
+    secure: process.env.NODE_ENV === "production", 
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax"
+  })
+  .json({
+    success: true,
+    responseData: profile
+  });
 });
 export const getOtherUsers = asyncHandler(async (req, res, next) => {
 
