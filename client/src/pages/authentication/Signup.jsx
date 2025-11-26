@@ -1,148 +1,133 @@
-import {React,useState,useEffect} from 'react'
-import { FaUser } from "react-icons/fa";
+import React, { useState, useEffect } from 'react';
+import { FaUser, FaEye, FaEyeSlash } from "react-icons/fa";
 import { IoKey } from "react-icons/io5";
 import { Link, useNavigate } from 'react-router-dom';
-import {useDispatch} from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux';
 import { registerUserThunk } from '../../store/slice/user/user.thunk';
 import toast from 'react-hot-toast';
-import {useSelector} from "react-redux"
 
 function Signup() {
-    const dispatch =useDispatch()
-    const navigate=useNavigate()
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { isAuthenticated, loading } = useSelector((state) => state.userReducer);
 
-    const {isAuthenticated}=useSelector((state)=>state.userReducer)
-        
-      useEffect(()=>{
-        if(isAuthenticated){
-            navigate("/")
-        }},[isAuthenticated])
+  const [showPassword, setShowPassword] = useState(false);
+  const [signupData, setSignupData] = useState({
+    fullName: "",
+    username: "",
+    password: "",
+    confirmPassword: "",
+    gender: "male"
+  });
 
-const [signupData,setSignupData]=useState({
-      fullName : "" ,
-      username : "",
-      password : "" ,
-      confirmPassword:"",
-      gender:"male"
-  })  
+  useEffect(() => {
+    if (isAuthenticated) navigate("/");
+  }, [isAuthenticated, navigate]);
 
-  const handleInputChange=(e)=>{
-    setSignupData((prev)=>({
-      ...prev,
-      [e.target.name]: e.target.value
-    }))
-  }
+  const handleInputChange = (e) => {
+    setSignupData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
 
-  const handleSignup=async ()=>{
-    // console.log(signupData)
-    if(signupData.password!==signupData.confirmPassword){
-      return toast.error("Password and Confirm Password don't match")
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    if (signupData.password !== signupData.confirmPassword) {
+      return toast.error("Passwords do not match");
     }
-    const response=await dispatch(registerUserThunk(signupData))
-    if(response?.payload?.success){
-      navigate("/")
-    }
-  }
+    const response = await dispatch(registerUserThunk(signupData));
+    if (response?.payload?.success) navigate("/");
+  };
 
   return (
-    <div className="h-screen flex items-center justify-center">
-      <div className='flex flex-col gap-4 w-80 bg-base-200 p-6 rounded-lg'>
-        <h2 className='text-lg text-center font-semibold'>Signup</h2>
+    <div className="h-screen flex items-center justify-center bg-base-200">
+      <div className="card w-96 bg-base-100 shadow-xl">
+        <div className="card-body">
+          <h2 className="text-2xl font-bold text-center mb-4">Sign Up</h2>
 
-        <label className="input ">
-          <FaUser />
-          <input
-            type="text"
-            required
-            name='fullName'
-            placeholder="Full Name"
-            onChange={handleInputChange}
-            pattern="[A-Za-z][A-Za-z0-9\-]*"
-            minLength="3"
-            maxLength="30"
-            title="Only letters, numbers or dash"
-          />
-        </label>
-        <label className="input ">
-          <FaUser />
-          <input
-            type="text"
-            name='username'
-            required
-            placeholder="Username"
-            onChange={handleInputChange}
-            pattern="[A-Za-z][A-Za-z0-9\-]*"
-            minLength="3"
-            maxLength="30"
-            title="Only letters, numbers or dash"
-          />
-        </label>
+          <form onSubmit={handleSignup} className="flex flex-col gap-3">
+            
+            {/* Full Name */}
+            <label className="input input-bordered flex items-center gap-2">
+              <FaUser className="text-gray-500" />
+              <input type="text" name="fullName" required placeholder="Full Name" className="grow" onChange={handleInputChange} />
+            </label>
 
-        <label className="input ">
-          <IoKey />
-          <input
-            type="password"
-            name="password"
-            required
-            placeholder="Password"
-            onChange={handleInputChange}
-            minLength="8"
-            pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
-            title="Must be more than 8 characters, including number, lowercase letter, uppercase letter"
-          />
-        </label>
-        <label className="input ">
-          <IoKey />
-          <input
-            type="password"
-            name="confirmPassword"
-            required
-            placeholder="Confirm Password"
-            onChange={handleInputChange}
-            minLength="8"
-            pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
-            title="Must be more than 8 characters, including number, lowercase letter, uppercase letter"
-          />
-        </label>
+            {/* Username */}
+            <label className="input input-bordered flex items-center gap-2">
+              <FaUser className="text-gray-500" />
+              <input type="text" name="username" required placeholder="Username" className="grow" onChange={handleInputChange} />
+            </label>
 
-        <div className='input input-brodered flex items-center gap-5'>
-          <label htmlFor="male" className='flex gap-3 items-center'>
-            <input
-             type="radio"
-              name="gender"
-               id="male"
-                value="male"
-                 className='radio radio-primary'
-                 onChange={handleInputChange}
-                 />
-          male       
-          </label>
-          <label htmlFor="female" className='flex gap-3 items-center'>
-            <input
-             type="radio"
-              name="gender"
-               id="female"
-                value="female"
-                 className='radio radio-primary'
-                 onChange={handleInputChange}
-                 />
-          female       
-          </label>
+            {/* Password */}
+            <label className="input input-bordered flex items-center gap-2">
+              <IoKey className="text-gray-500" />
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                required
+                placeholder="Password"
+                className="grow"
+                onChange={handleInputChange}
+                minLength="8"
+              />
+              <button type="button" onClick={() => setShowPassword(!showPassword)}>
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </label>
+
+            {/* Confirm Password */}
+            <label className="input input-bordered flex items-center gap-2">
+              <IoKey className="text-gray-500" />
+              <input
+                type={showPassword ? "text" : "password"}
+                name="confirmPassword"
+                required
+                placeholder="Confirm Password"
+                className="grow"
+                onChange={handleInputChange}
+              />
+            </label>
+
+            {/* Gender */}
+            <div className="flex justify-center gap-6 my-2">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input 
+                  type="radio" 
+                  name="gender" 
+                  value="male" 
+                  className="radio radio-primary" 
+                  checked={signupData.gender === 'male'}
+                  onChange={handleInputChange} 
+                />
+                <span>Male</span>
+              </label>
+              
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input 
+                  type="radio" 
+                  name="gender" 
+                  value="female" 
+                  className="radio radio-primary" 
+                  checked={signupData.gender === 'female'}
+                  onChange={handleInputChange} 
+                />
+                <span>Female</span>
+              </label>
+            </div>
+
+            {/* Button */}
+            <button type="submit" className="btn btn-primary" disabled={loading}>
+              {loading ? <span className="loading loading-spinner"></span> : "Sign Up"}
+            </button>
+          </form>
+
+          <div className="text-center mt-2">
+            <p>Already have an account?</p>
+            <Link to="/login" className="link link-primary">Login</Link>
+          </div>
         </div>
-
-        <p className="validator-hint hidden">
-          Must be more than 8 characters, including
-          <br />At least one number <br />At least one lowercase letter <br />At least one uppercase letter
-        </p>
-        <button onClick={handleSignup} className="btn btn-primary">SignUp</button>
-
-        <p>
-          Already Have an Account? &nbsp;
-          <Link to='/login' className='text-blue-400 underline'>Login</Link>
-        </p>
       </div>
     </div>
-  )
+  );
 }
 
-export default Signup
+export default Signup;

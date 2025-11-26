@@ -4,35 +4,37 @@ import { useDispatch, useSelector } from 'react-redux';
 import { sendMessageThunk } from '../../store/slice/message/message.thunk';
 
 const SendMessage = () => {
+    const dispatch = useDispatch()
+    const { selectedUser } = useSelector(state => state.userReducer)
+    const [message, setMessage] = useState("")
 
-    const dispatch=useDispatch()
-    const {selectedUser}=useSelector(state=>state.userReducer)
-    const [message,setMessage]=useState("")
+    const handleSendMessage = async (e) => {
+        e.preventDefault() // Prevent page reload on form submit
+        if(!message.trim()) return;
 
-    const handleSendMessage=()=>{
-        dispatch(
-            sendMessageThunk({
-                receiverId:selectedUser?._id,
-                message
-            })
-        )
+        await dispatch(sendMessageThunk({
+            receiverId: selectedUser?._id,
+            message
+        }))
         setMessage("")
     }
 
-  return (
-    <div className='w-full p-3 flex gap-2 border-t border-t-white/10'>
-            <input
-            type="text" 
-            placeholder="Type Here..." 
-            className="input input-primary w-full" 
-            onChange={(e)=>setMessage(e.target.value)}
-            value={message}
-            />
-            <button onClick={handleSendMessage} className="btn btn-square border border-[#605dff]">
-              <IoSend />
-            </button>
-          </div>
-  )
+    return (
+        <form onSubmit={handleSendMessage} className='p-4 bg-base-100 border-t border-base-300'>
+            <div className='flex items-center gap-2'>
+                <input
+                    type="text"
+                    placeholder="Type a message..."
+                    className="input input-bordered w-full rounded-full focus:border-primary"
+                    onChange={(e) => setMessage(e.target.value)}
+                    value={message}
+                />
+                <button type="submit" className="btn btn-circle btn-primary text-white">
+                    <IoSend className='text-lg' />
+                </button>
+            </div>
+        </form>
+    )
 }
 
 export default SendMessage

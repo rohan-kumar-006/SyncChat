@@ -1,31 +1,36 @@
 import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { setSelectedUser } from '../../store/slice/user/user.slice'
-import { useEffect } from 'react'
 
-const User = ({userDetails}) => {
-    const dispatch=useDispatch()
-    const {selectedUser}=useSelector(state=>state.userReducer)
-    const {onlineUsers}=useSelector(state=>state.socketReducer)
+const User = ({ userDetails }) => {
+    const dispatch = useDispatch()
+    const { selectedUser } = useSelector(state => state.userReducer)
+    const { onlineUsers } = useSelector(state => state.socketReducer)
 
-    const isUserOnline=onlineUsers?.includes(userDetails?._id)
-    // console.log(first)
-    const handleUserClick=()=>{
+    const isUserOnline = onlineUsers?.includes(userDetails?._id)
+    const isSelected = selectedUser?._id === userDetails?._id
+
+    const handleUserClick = () => {
         dispatch(setSelectedUser(userDetails))
     }
-    // useEffect(()=>{
-    //     console.log(isUserOnline)
-    // },[isUserOnline])
-    return (                                                                                
-        <div onClick={ handleUserClick } className={`flex gap-5 rounded-lg w-full items-center hover:bg-gray-800 rounded-l py-1 px-2 cursor-pointer ${userDetails?._id===selectedUser?._id && 'bg-gray-800'}`}>
-            <div className={`mx-3 avatar avatar-${isUserOnline && 'online'}`}>
-                <div className="w-12 rounded-full">
-                    <img src={userDetails?.avatar} />
+
+    return (
+        <div 
+            onClick={handleUserClick} 
+            className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all duration-200 
+            ${isSelected ? 'bg-primary text-primary-content' : 'hover:bg-base-200'}`}
+        >
+            <div className={`avatar ${isUserOnline ? 'online' : ''}`}>
+                <div className="w-10 rounded-full border border-base-300">
+                    <img src={userDetails?.avatar || "https://avatar.iran.liara.run/public"} alt="avatar" />
                 </div>
             </div>
-            <div >
-                <h2 className='line-clamp-1'>{userDetails?.fullName}</h2>
-                <p className='text-xs'>{userDetails?.username}</p>
+            
+            <div className='flex flex-col overflow-hidden'>
+                <h2 className='font-semibold text-sm truncate capitalize'>{userDetails?.fullName}</h2>
+                <p className={`text-xs truncate ${isSelected ? 'text-primary-content/70' : 'text-base-content/60'}`}>
+                    @{userDetails?.username}
+                </p>
             </div>
         </div>
     )

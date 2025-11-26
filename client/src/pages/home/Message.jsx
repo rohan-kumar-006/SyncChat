@@ -1,39 +1,49 @@
-import React from 'react'
-import { useEffect } from 'react'
-import { useRef } from 'react'
-import {useSelector} from 'react-redux'
+import React, { useEffect, useRef } from 'react'
+import { useSelector } from 'react-redux'
 
+const Message = ({ messageDetails }) => {
+    const { userProfile, selectedUser } = useSelector(state => state.userReducer)
+    const scrollRef = useRef()
 
-const Message = ({messageDetails}) => {
+    // Helper to format time
+    const extractTime = (dateString) => {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return "Just now"; 
+        const hours = date.getHours().toString().padStart(2, "0");
+        const minutes = date.getMinutes().toString().padStart(2, "0");
+        return `${hours}:${minutes}`;
+    };
 
-    const {userProfile,selectedUser}=useSelector(state=>state.userReducer)
-    const messageRef=useRef(null)
+    const isSender = messageDetails?.senderId === userProfile?._id;
+    const time = extractTime(messageDetails?.createdAt || Date.now());
 
-    useEffect(()=>{
-        if(messageRef.current){
-            messageRef.current.scrollIntoView({behavior:"smooth"})
-        }
-    },[])
+    useEffect(() => {
+        scrollRef.current?.scrollIntoView({ behavior: "smooth" })
+    }, [messageDetails])
 
     return (
-        <>
-            <div
-                ref={messageRef}
-            className={`chat ${userProfile?._id=== messageDetails?.senderId? 'chat-end' : 'chat-start' }`}>
-                <div className="chat-image avatar">
-                    <div className="w-10 rounded-full">
-                        <img
-                            alt="Tailwind CSS chat bubble component"
-                            src={userProfile?._id=== messageDetails?.senderId ? userProfile?.avatar: selectedUser.avatar } 
-                        />
-                    </div>
+        <div ref={scrollRef} className={`chat ${isSender ? 'chat-end' : 'chat-start'}`}>
+            <div className="chat-image avatar">
+                <div className="w-10 rounded-full">
+                    <img
+                        alt="avatar"
+                        src={isSender ? userProfile?.avatar : selectedUser?.avatar}
+                    />
                 </div>
-                <div className="chat-header">
-                    <time className="text-xs opacity-50">12:45</time>
-                </div>
-                <div className="chat-bubble">{messageDetails?.message}</div>
             </div>
-        </>
+            
+            <div className="chat-header opacity-50 text-xs mb-1">
+               {isSender ? 'You' : selectedUser?.fullName}
+            </div>
+
+            <div className={`chat-bubble ${isSender ? 'chat-bubble-primary' : 'chat-bubble-accent'}`}>
+                {messageDetails?.message}
+            </div>
+            
+            <div className="chat-footer opacity-50 text-xs mt-1">
+                {time}
+            </div>
+        </div>
     )
 }
 

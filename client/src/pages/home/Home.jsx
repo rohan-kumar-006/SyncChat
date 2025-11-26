@@ -1,44 +1,44 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import MessageContainer from './MessageContainer'
-import UserSlidebar from './UserSlidebar'
+import UserSidebar from './UserSlidebar' // Fixed Typo
 import { useDispatch, useSelector } from 'react-redux'
-import { useEffect } from 'react'
-import { initializeSocket ,setOnlineUsers} from '../../store/slice/socket/socket.slice'
+import { initializeSocket, setOnlineUsers } from '../../store/slice/socket/socket.slice'
 import { setNewMessage } from '../../store/slice/message/message.slice'
 
-
-
 function Home() {
-
   const { isAuthenticated, userProfile } = useSelector(state => state.userReducer)
   const { socket } = useSelector(state => state.socketReducer)
   const dispatch = useDispatch()
 
+  // Initialize Socket
   useEffect(() => {
-    console.log("hello")
-    if (!isAuthenticated) {
-      return
+    if (isAuthenticated && userProfile?._id) {
+      dispatch(initializeSocket(userProfile._id))
     }
-    dispatch(initializeSocket(userProfile?._id))
-  }, [isAuthenticated])
+  }, [isAuthenticated, userProfile, dispatch])
 
+  // Listen for Socket Events
   useEffect(() => {
     if (!socket) return
-    socket.on("onlineUsers", (onlineUsers) => {
-      dispatch(setOnlineUsers(onlineUsers))
+    
+    socket.on("onlineUsers", (users) => {
+      dispatch(setOnlineUsers(users))
     })
-    socket.on("newMessage", (newMessage) => {
-      dispatch(setNewMessage(newMessage))
+    
+    socket.on("newMessage", (msg) => {
+      dispatch(setNewMessage(msg))
     })
-    return ()=>{
-      socket.close()
-    }
-  }, [socket])
 
+    return () => {
+      socket.off("onlineUsers")
+      socket.off("newMessage")
+    }
+  }, [socket, dispatch])
 
   return (
-    <div className='flex bg-black'>
-      <UserSlidebar />
+    // Main Container: Sidebar is Base-300 (darker), Chat is Base-200 (lighter)
+    <div className='flex h-screen overflow-hidden bg-base-200'>
+      <UserSidebar />
       <MessageContainer />
     </div>
   )
