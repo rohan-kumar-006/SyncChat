@@ -131,4 +131,27 @@ export const getOtherUsers = asyncHandler(async (req, res, next) => {
     })
 });
 
+export const updateProfile = asyncHandler(async (req, res, next) => {
+    const userId = req.user._id;
+    const { fullName } = req.body;
 
+    const updateData = {};
+    
+    if (fullName) updateData.fullName = fullName;
+    
+
+    if (req.file) {
+        updateData.avatar = req.file.path;
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        updateData,
+        { new: true, runValidators: true }
+    );
+
+    res.status(200).json({
+        success: true,
+        responseData: updatedUser
+    });
+});

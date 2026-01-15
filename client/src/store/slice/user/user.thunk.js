@@ -70,3 +70,22 @@ export const getOtherUserThunk = createAsyncThunk("/user/getOtherUsers",  async 
     return rejectWithValue(errorOutput)
   }
 })
+
+export const updateUserProfileThunk = createAsyncThunk(
+  "user/updateProfile",
+  async (formData, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.put("/user/update-profile", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      toast.success("Profile updated successfully");
+      return response.data;
+    } catch (error) {
+      const errorOutput = error?.response?.data?.errMessage;
+      toast.error(errorOutput);
+      return rejectWithValue(errorOutput);
+    }
+  }
+);

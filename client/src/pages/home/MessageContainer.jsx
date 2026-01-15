@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import Message from './Message'
 import { useDispatch, useSelector } from 'react-redux'
 import { getMessageThunk } from '../../store/slice/message/message.thunk'
@@ -9,12 +9,33 @@ const MessageContainer = () => {
   const dispatch = useDispatch()
   const { selectedUser, userProfile } = useSelector(state => state.userReducer)
   const { messages } = useSelector(state => state.messageReducer)
+  const [avatarError, setAvatarError] = useState(false)
+
+  // Helper to get initials
+  const getInitials = (name = '') => {
+    if (!name) return 'U'
+
+    const words = name.split(' ')
+    const first = words[0][0]
+    const second = words[1]?.[0] || ''
+
+    return (first + second).toUpperCase()
+  };
+
+  // Check if avatar is a custom upload (Cloudinary URL)
+  const isCustomAvatar = (avatar) => {
+    return avatar && avatar.includes('cloudinary')
+  }
 
   useEffect(() => {
     if (selectedUser?._id) {
       dispatch(getMessageThunk({ receiverId: selectedUser._id }))
     }
   }, [selectedUser, dispatch])
+
+  useEffect(() => {
+    setAvatarError(false)
+  }, [selectedUser])
 
   return (
     <div className='flex-1 flex flex-col h-full bg-base-200 relative'>
@@ -25,8 +46,21 @@ const MessageContainer = () => {
           {/* Chat Header */}
           <div className='bg-base-100/80 backdrop-blur-sm px-6 py-3 border-b border-base-300 flex items-center gap-4 shadow-sm z-10'>
             <div className="avatar">
-              <div className="w-10 rounded-full">
-                <img src={selectedUser?.avatar} alt="user" />
+              <div className="w-10 h-10 rounded-full border border-base-300 overflow-hidden">
+                {isCustomAvatar(selectedUser?.avatar) && !avatarError ? (
+                  <img 
+                    src={selectedUser.avatar} 
+                    alt={selectedUser?.fullName || selectedUser?.username}
+                    className="w-full h-full object-cover"
+                    onError={() => setAvatarError(true)}
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-amber-100">
+                    <span className="font-bold text-sm uppercase text-amber-800">
+                      {getInitials(selectedUser?.fullName || selectedUser?.username)}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
             <div>
