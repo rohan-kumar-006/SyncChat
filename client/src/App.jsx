@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { Route,Routes } from 'react-router-dom'
 import { useSelector,useDispatch } from 'react-redux'
 import './App.css'
 import { getOtherUserThunk, getUserProfileThunk, loginUserThunk } from './store/slice/user/user.thunk'
